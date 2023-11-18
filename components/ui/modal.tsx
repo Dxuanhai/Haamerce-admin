@@ -15,7 +15,7 @@ interface ModalProps {
   description: string;
   isOpen: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -39,12 +39,6 @@ export const Modal: React.FC<ModalProps> = ({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <div>{children}</div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">Continue</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
