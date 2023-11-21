@@ -34,25 +34,29 @@ import {
 import ImageUpload from "@/components/ui/image-upload";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const formSchema = z.object({
-  name: z.string().min(1),
-  images: z.object({ url: z.string() }).array(),
-  price: z.coerce.number().min(1),
-  categoryId: z.string().min(1),
-  colorId: z.string().min(1),
-  sizeId: z.string().min(1),
-  isFeatured: z.boolean().default(false).optional(),
-  isArchived: z.boolean().default(false).optional(),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(1),
+    images: z.object({ url: z.string() }).array(),
+    price: z.coerce.number().min(1),
+    categoryId: z.string().min(1),
+    colorId: z.string().min(1, { message: "Please, choose a color" }),
+    sizeId: z.string().min(1),
+    discount: z.coerce.number(),
+    isFeatured: z.boolean().default(false).optional(),
+    isArchived: z.boolean().default(false).optional(),
+  })
+  .refine((data) => {
+    if (data.discount && data.price && data.discount > data.price) {
+      throw toast.error("Discount cannot be greater than price");
+    }
+    return data;
+  });
 
 type ProductFormValues = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
-  initialData:
-    | (Product & {
-        images: Image[];
-      })
-    | null;
+  initialData: Product | null;
   categories: Category[];
   colors: Color[];
   sizes: Size[];
@@ -69,6 +73,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [idColorProduct, setIdColorProduct] = useState("");
 
   const title = initialData ? "Edit product" : "Create product";
   const description = initialData ? "Edit a product." : "Add a new product";
@@ -78,12 +83,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const defaultValues = initialData
     ? {
         ...initialData,
+        images: [],
+        colorId: "",
         price: parseFloat(String(initialData?.price)),
       }
     : {
         name: "",
         images: [],
         price: 0,
+        discount: 0,
         categoryId: "",
         colorId: "",
         sizeId: "",
@@ -93,16 +101,39 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: defaultValues,
   });
+  const onSelect = (field: any) => async (value: string) => {
+    try {
+      setLoading(true);
+      const url = `/api/${params.storeId}/products/${params.productId}/${value}`;
+      const res = await axios.get(url);
+
+      if (res?.data[0]) {
+        form.setValue("images", res?.data[0]?.images);
+        form.setValue("colorId", res?.data[0]?.color.id);
+        setIdColorProduct(res.data[0].id);
+      } else {
+        form.setValue("images", []);
+        form.setValue("colorId", value);
+        field.onChange;
+      }
+    } catch (error: any) {
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
+      setOpen(false);
+    }
+  };
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/products/${params.productId}`,
-          data
+          { ...data, idColorProduct }
         );
       } else {
         await axios.post(`/api/${params.storeId}/products`, data);
@@ -159,30 +190,35 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full"
         >
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Images</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value.map((image) => image.url)}
-                    disabled={loading}
-                    onChange={(url) =>
-                      field.onChange([...field.value, { url }])
-                    }
-                    onRemove={(url) =>
-                      field.onChange([
-                        ...field.value.filter((current) => current.url !== url),
-                      ])
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {form.getValues("colorId") && (
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Images</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value?.map((image) => image.url)}
+                      disabled={loading}
+                      onChange={(url) =>
+                        field.onChange([...field.value, { url }])
+                      }
+                      onRemove={(url) =>
+                        field.onChange([
+                          ...field.value.filter(
+                            (current) => current.url !== url
+                          ),
+                        ])
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -211,8 +247,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <Input
                       type="number"
                       disabled={loading}
-                      placeholder="9.99"
+                      placeholder="999999"
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="discount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Discount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      {...field}
+                      defaultValue={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -240,7 +294,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
+                      {categories?.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -272,7 +326,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {sizes.map((size) => (
+                      {sizes?.map((size) => (
                         <SelectItem key={size.id} value={size.id}>
                           {size.name}
                         </SelectItem>
@@ -287,11 +341,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               control={form.control}
               name="colorId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <FormLabel>Color</FormLabel>
                   <Select
                     disabled={loading}
-                    onValueChange={field.onChange}
+                    onValueChange={onSelect(field)}
                     value={field.value}
                     defaultValue={field.value}
                   >
@@ -304,9 +358,19 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {colors.map((color) => (
-                        <SelectItem key={color.id} value={color.id}>
-                          {color.name}
+                      {colors?.map((color) => (
+                        <SelectItem
+                          key={color.id}
+                          value={color.id}
+                          className="block"
+                        >
+                          <div className=" flex items-center justify-start gap-x-2 ">
+                            <div
+                              style={{ backgroundColor: color.value }}
+                              className="h-6 w-10 rounded-full border  "
+                            ></div>
+                            <h3>{color.name}</h3>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -19,6 +19,7 @@ export async function POST(
       colorId,
       sizeId,
       images,
+      discount,
       isFeatured,
       isArchived,
     } = body;
@@ -29,6 +30,9 @@ export async function POST(
 
     if (!name) {
       return new NextResponse("Name is required", { status: 400 });
+    }
+    if (typeof discount !== "number") {
+      return new NextResponse("discount is required", { status: 400 });
     }
 
     if (!images || !images.length) {
@@ -73,12 +77,17 @@ export async function POST(
         isFeatured,
         isArchived,
         categoryId,
-        colorId,
+        discount,
         sizeId,
         storeId: params.storeId,
-        images: {
-          createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+        productColors: {
+          create: {
+            color: { connect: { id: colorId } },
+            images: {
+              createMany: {
+                data: images,
+              },
+            },
           },
         },
       },
@@ -110,15 +119,24 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        colorId,
+
+        productColors: {
+          some: {
+            colorId: colorId,
+          },
+        },
         sizeId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
-        images: true,
+        productColors: {
+          select: {
+            color: true,
+            images: true,
+          },
+        },
         category: true,
-        color: true,
         size: true,
       },
       orderBy: {
