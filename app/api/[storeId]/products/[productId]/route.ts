@@ -17,10 +17,8 @@ export async function GET(
         id: params.productId,
       },
       include: {
-        images: true,
         category: true,
         size: true,
-        color: true,
       },
     });
 
@@ -88,6 +86,7 @@ export async function PATCH(
       sizeId,
       isFeatured,
       isArchived,
+      idColorProduct,
     } = body;
 
     if (!userId) {
@@ -95,7 +94,7 @@ export async function PATCH(
     }
 
     if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
+      return new NextResponse("ColorProduct id is required", { status: 400 });
     }
 
     if (!name) {
@@ -133,7 +132,7 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 405 });
     }
 
-    await prismadb.product.update({
+    const product = await prismadb.product.update({
       where: {
         id: params.productId,
       },
@@ -141,28 +140,39 @@ export async function PATCH(
         name,
         price,
         categoryId,
-        colorId,
         sizeId,
-        images: {
-          deleteMany: {},
-        },
         isFeatured,
         isArchived,
       },
     });
 
-    const product = await prismadb.product.update({
-      where: {
-        id: params.productId,
-      },
-      data: {
-        images: {
-          createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+    if (idColorProduct) {
+      await prismadb.productColor.update({
+        where: {
+          id: idColorProduct,
+        },
+        data: {
+          images: {
+            deleteMany: {},
+            createMany: {
+              data: images,
+            },
           },
         },
-      },
-    });
+      });
+    } else {
+      await prismadb.productColor.create({
+        data: {
+          productId: params.productId,
+          colorId,
+          images: {
+            createMany: {
+              data: images,
+            },
+          },
+        },
+      });
+    }
 
     return NextResponse.json(product);
   } catch (error) {
