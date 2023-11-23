@@ -18,10 +18,6 @@ export async function POST(
       return new NextResponse("Unauthenticated", { status: 403 });
     }
 
-    if (!label) {
-      return new NextResponse("Label is required", { status: 400 });
-    }
-
     if (!imageUrl) {
       return new NextResponse("Image URL is required", { status: 400 });
     }
@@ -43,7 +39,7 @@ export async function POST(
 
     const billboard = await prismadb.billboard.create({
       data: {
-        label,
+        label: label ? label : undefined,
         imageUrl,
         storeId: params.storeId,
       },
