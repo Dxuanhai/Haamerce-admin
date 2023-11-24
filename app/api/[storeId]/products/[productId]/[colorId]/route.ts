@@ -23,6 +23,7 @@ export async function GET(
       select: {
         images: true,
         color: true,
+        sizes: true,
         id: true,
       },
     });

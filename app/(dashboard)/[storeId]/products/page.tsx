@@ -13,7 +13,7 @@ const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
     },
     include: {
       category: true,
-      size: true,
+
       productColors: {
         select: {
           color: true,
@@ -32,8 +32,8 @@ const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
     isArchived: item.isArchived,
     price: formatterVND.format(item.price),
     category: item.category.name,
-    size: item.size.name,
     discount: formatterVND.format(item.discount),
+
     color: item.productColors.map((item) => ({
       id: item.color.id,
       storeId: item.color.storeId,
