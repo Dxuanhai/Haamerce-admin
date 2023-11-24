@@ -38,10 +38,20 @@ const formSchema = z
   .object({
     name: z.string().min(1),
     images: z.object({ url: z.string() }).array(),
+    sizes: z
+      .array(
+        z.object({
+          name: z.string(),
+          value: z.string(),
+        })
+      )
+      .refine((val) => val.length > 0, {
+        message: "Please select at least one size",
+      }),
+
     price: z.coerce.number().min(1),
     categoryId: z.string().min(1),
     colorId: z.string().min(1, { message: "Please, choose a color" }),
-    sizeId: z.string().min(1),
     discount: z.coerce.number(),
     isFeatured: z.boolean().default(false).optional(),
     isArchived: z.boolean().default(false).optional(),
@@ -59,7 +69,12 @@ interface ProductFormProps {
   initialData: Product | null;
   categories: Category[];
   colors: Color[];
-  sizes: Size[];
+  sizes: {
+    id: string;
+    storeId: string;
+    name: string;
+    value: string;
+  }[];
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
@@ -85,6 +100,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         ...initialData,
         images: [],
         colorId: "",
+        sizes: [],
         price: parseFloat(String(initialData?.price)),
       }
     : {
@@ -94,7 +110,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         discount: 0,
         categoryId: "",
         colorId: "",
-        sizeId: "",
+        sizes: [],
         isFeatured: false,
         isArchived: false,
       };
@@ -111,6 +127,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       if (res?.data[0]) {
         form.setValue("images", res?.data[0]?.images);
+        form.setValue("sizes", res?.data[0]?.sizes);
         form.setValue("colorId", res?.data[0]?.color.id);
         setIdColorProduct(res.data[0].id);
       } else {
@@ -305,38 +322,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="sizeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Size</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Select a size"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sizes?.map((size) => (
-                        <SelectItem key={size.id} value={size.id}>
-                          {size.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name="colorId"
@@ -375,6 +361,44 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sizes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Size</FormLabel>
+                  {sizes?.map((size) => (
+                    <div key={size.id} className="flex gap-x-2">
+                      <Checkbox
+                        value={size.id}
+                        // @ts-ignore
+                        checked={field.value.some(
+                          // @ts-ignore
+                          (selectedSize) => selectedSize.id === size.id
+                        )}
+                        // @ts-ignore
+                        onCheckedChange={(isChecked) => {
+                          if (isChecked) {
+                            // @ts-ignore
+                            field.onChange([...field.value, size]);
+                          } else {
+                            field.onChange(
+                              // @ts-ignore
+                              field.value.filter(
+                                // @ts-ignore
+                                (selectedSize) => selectedSize.id !== size.id
+                              )
+                            );
+                          }
+                        }}
+                      />
+                      <p>{size.name}</p>
+                    </div>
+                  ))}
                   <FormMessage />
                 </FormItem>
               )}
