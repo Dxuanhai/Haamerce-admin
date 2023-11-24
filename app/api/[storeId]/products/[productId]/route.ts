@@ -82,6 +82,7 @@ export async function PATCH(
       categoryId,
       images,
       colorId,
+      discount,
       sizes,
       isFeatured,
       isArchived,
@@ -106,6 +107,9 @@ export async function PATCH(
 
     if (!price) {
       return new NextResponse("Price is required", { status: 400 });
+    }
+    if (!discount) {
+      return new NextResponse("Discount is required", { status: 400 });
     }
 
     if (!categoryId) {
@@ -139,7 +143,7 @@ export async function PATCH(
         name,
         price,
         categoryId,
-
+        discount: discount && discount,
         isFeatured,
         isArchived,
       },
@@ -177,7 +181,7 @@ export async function PATCH(
           },
           sizes: {
             createMany: {
-              data: images,
+              data: sizes,
             },
           },
         },

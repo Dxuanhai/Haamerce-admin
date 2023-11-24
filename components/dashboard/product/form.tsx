@@ -37,7 +37,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 const formSchema = z
   .object({
     name: z.string().min(1),
-    images: z.object({ url: z.string() }).array(),
+    images: z
+      .object({ url: z.string() })
+      .array()
+      .refine((val) => val.length > 0, {
+        message: "Please upload at least one image",
+      }),
     sizes: z
       .array(
         z.object({
@@ -133,6 +138,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       } else {
         form.setValue("images", []);
         form.setValue("colorId", value);
+        form.setValue("sizes", []);
         field.onChange;
       }
     } catch (error: any) {
@@ -371,34 +377,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Size</FormLabel>
-                  {sizes?.map((size) => (
-                    <div key={size.id} className="flex gap-x-2">
-                      <Checkbox
-                        value={size.id}
-                        // @ts-ignore
-                        checked={field.value.some(
-                          // @ts-ignore
-                          (selectedSize) => selectedSize.id === size.id
-                        )}
-                        // @ts-ignore
-                        onCheckedChange={(isChecked) => {
-                          if (isChecked) {
-                            // @ts-ignore
-                            field.onChange([...field.value, size]);
-                          } else {
-                            field.onChange(
-                              // @ts-ignore
-                              field.value.filter(
-                                // @ts-ignore
-                                (selectedSize) => selectedSize.id !== size.id
-                              )
-                            );
-                          }
-                        }}
-                      />
-                      <p>{size.name}</p>
-                    </div>
-                  ))}
+                  <div className="grid  grid-cols-1  lg:grid-cols-2 gap-4  ">
+                    {sizes?.map((size) => (
+                      <div key={size.id} className="flex gap-x-2">
+                        <Checkbox
+                          className="w-5 h-5"
+                          value={size.id}
+                          checked={field.value.some(
+                            (selectedSize) => selectedSize.name === size.name
+                          )}
+                          onCheckedChange={(isChecked) => {
+                            if (isChecked) {
+                              field.onChange([...field.value, size]);
+                            } else {
+                              field.onChange(
+                                field.value.filter(
+                                  (selectedSize) =>
+                                    selectedSize.name !== size.name
+                                )
+                              );
+                            }
+                          }}
+                        />
+                        <p className="text-lg"> {size.name}</p>
+                      </div>
+                    ))}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
