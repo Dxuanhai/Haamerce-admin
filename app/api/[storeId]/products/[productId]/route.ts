@@ -16,8 +16,16 @@ export async function GET(
       where: {
         id: params.productId,
       },
+
       include: {
         category: true,
+        productColors: {
+          select: {
+            color: true,
+            images: true,
+            sizes: true,
+          },
+        },
       },
     });
 
