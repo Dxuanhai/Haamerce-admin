@@ -71,10 +71,7 @@ model Product {
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
   discount    Int
-
   productColors ProductColor[]
-
-
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -91,18 +88,27 @@ model Order {
   isPaid     Boolean   @default(false)
   phone      String    @default("")
   address    String    @default("")
-  name String
-  price Int
-  color String
-  size String
-
+  
+  bills Bill[]   @relation("OrderToBill")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([storeId])
 }
 
+model Bill { 
+  id   String    @id @default(uuid())
+  name String
+  price Int
+  color String
+  size String
+  orderId String
+  order Order @relation("OrderToBill",fields: [orderId],references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  @@index([orderId])
+}
 
 
 model Size {
