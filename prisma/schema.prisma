@@ -83,11 +83,13 @@ model Product {
 
 model Order {
   id        String    @id @default(uuid())
-  storeId     String    // Foreign Key to Store
-  store       Store     @relation("StoreToOrder", fields: [storeId], references: [id])
-  isPaid     Boolean   @default(false)
-  phone      String    @default("")
-  address    String    @default("")
+  storeId   String    // Foreign Key to Store
+  store     Store     @relation("StoreToOrder", fields: [storeId], references: [id])
+  isPaid    Boolean   @default(false)
+  fullName  String    @default("")
+  phone     String    @default("")
+  address   String    @default("")
+
   
   bills Bill[]   @relation("OrderToBill")
   createdAt DateTime  @default(now())
@@ -95,13 +97,13 @@ model Order {
 
   @@index([storeId])
 }
-
 model Bill { 
   id   String    @id @default(uuid())
   name String
   price Int
   color String
   size String
+  quantity Int
   orderId String
   order Order @relation("OrderToBill",fields: [orderId],references: [id])
   createdAt DateTime  @default(now())
