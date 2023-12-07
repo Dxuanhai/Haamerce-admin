@@ -12,12 +12,9 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
       storeId: params.storeId,
     },
     include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
+      bills: true,
     },
+
     orderBy: {
       createdAt: "desc",
     },
@@ -25,15 +22,12 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
 
   const formattedOrders: OrderColumn[] = orders.map((item) => ({
     id: item.id,
+    fullName: item.fullName,
     phone: item.phone,
     address: item.address,
-    products: item.orderItems
-      .map((orderItem) => orderItem.product.name)
-      .join(", "),
-    totalPrice: formatterVND.format(
-      item.orderItems.reduce((total, item) => {
-        return total + Number(item.product.price);
-      }, 0)
+    totalPrice: item.bills.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.price,
+      0
     ),
     isPaid: item.isPaid,
     createdAt: format(item.createdAt, "MMMM do, yyyy"),

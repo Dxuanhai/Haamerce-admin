@@ -71,10 +71,7 @@ model Product {
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
   discount    Int
-
   productColors ProductColor[]
-
-  orderItems  OrderItem[]   // Relation to Order model
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -86,29 +83,35 @@ model Product {
 
 model Order {
   id        String    @id @default(uuid())
-  storeId     String    // Foreign Key to Store
-  store       Store     @relation("StoreToOrder", fields: [storeId], references: [id])
-  orderItems OrderItem[] // Relation to OrderItem model
-  isPaid     Boolean   @default(false)
-  phone      String    @default("")
-  address    String    @default("")
+  storeId   String    // Foreign Key to Store
+  store     Store     @relation("StoreToOrder", fields: [storeId], references: [id])
+  isPaid    Boolean   @default(false)
+  fullName  String    @default("")
+  phone     String    @default("")
+  address   String    @default("")
+
+  
+  bills Bill[]   @relation("OrderToBill")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([storeId])
 }
-
-// Intermediary for a many-to-many relationship
-model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String  // Foreign Key to Order
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String  // Foreign Key to Product
-  product   Product @relation(fields: [productId], references: [id])
+model Bill { 
+  id   String    @id @default(uuid())
+  name String
+  price Int
+  color String
+  size String
+  quantity Int
+  orderId String
+  order Order @relation("OrderToBill",fields: [orderId],references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([orderId])
-  @@index([productId])
 }
+
 
 model Size {
   id          String    @id @default(uuid())
