@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { columns, OrderColumn } from "./columns";
 import { ApiList } from "@/components/ui/api-list";
+import DetailOrder from "./deltail-order";
 
 interface OrderClientProps {
   data: OrderColumn[];

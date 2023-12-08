@@ -25,11 +25,24 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     fullName: item.fullName,
     phone: item.phone,
     address: item.address,
-    totalPrice: item.bills.reduce(
-      (accumulator, currentValue) => accumulator + currentValue.price,
-      0
+    email: item.email,
+    totalPrice: formatterVND.format(
+      item.bills.reduce(
+        (accumulator, currentValue) => accumulator + currentValue.price,
+        0
+      )
     ),
     isPaid: item.isPaid,
+    products: item.bills.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        price: formatterVND.format(item.price),
+        color: item.color,
+        size: item.size,
+        quantity: item.quantity,
+      };
+    }),
     createdAt: format(item.createdAt, "MMMM do, yyyy"),
   }));
 

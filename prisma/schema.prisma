@@ -89,6 +89,7 @@ model Order {
   fullName  String    @default("")
   phone     String    @default("")
   address   String    @default("")
+  email     String @default("")
 
   
   bills Bill[]   @relation("OrderToBill")
@@ -105,7 +106,7 @@ model Bill {
   size String
   quantity Int
   orderId String
-  order Order @relation("OrderToBill",fields: [orderId],references: [id])
+  order Order @relation("OrderToBill",fields: [orderId],references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
