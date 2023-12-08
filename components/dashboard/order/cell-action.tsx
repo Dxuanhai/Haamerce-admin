@@ -19,6 +19,7 @@ import { AlertModal } from "@/components/modals/alert-modal";
 
 import { OrderColumn } from "./columns";
 import DetailOrder from "./deltail-order";
+import { sendEmail } from "@/lib/utils";
 
 interface CellActionProps {
   data: OrderColumn;
@@ -44,7 +45,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       setLoading(false);
     }
   };
-  const handleConfirmOrder = () => {};
+  const handleConfirmOrder = async () => {
+    try {
+      await sendEmail(data);
+    } catch (error) {
+      console.log("🚀  / handleConfirmOrder  / error:", error);
+      toast.error("Something went wrong");
+    }
+  };
 
   return (
     <>
