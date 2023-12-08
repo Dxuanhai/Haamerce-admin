@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-
 import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
 
 export async function POST(
   req: Request,
@@ -62,7 +60,9 @@ export async function POST(
     const newOrder = await prismadb.order.create({
       data: {
         fullName,
+        email,
         address: `${province} /${district} /${ward} /${address}`,
+        phone: phoneNumber,
         storeId: params.storeId,
         bills: {
           createMany: {
