@@ -19,7 +19,6 @@ import { AlertModal } from "@/components/modals/alert-modal";
 
 import { OrderColumn } from "./columns";
 import DetailOrder from "./deltail-order";
-import { sendEmail } from "@/lib/utils";
 
 interface CellActionProps {
   data: OrderColumn;
@@ -46,8 +45,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     }
   };
   const handleConfirmOrder = async () => {
+    await axios.patch(`/api/${params.storeId}/orders/${data.id}`, data);
+    toast.success("Confirmed successfully");
+    router.refresh();
     try {
-      await sendEmail(data);
     } catch (error) {
       console.log("🚀  / handleConfirmOrder  / error:", error);
       toast.error("Something went wrong");
