@@ -111,33 +111,46 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;
-    const colorId = searchParams.get("colorId") || undefined;
-    const sizeId = searchParams.get("sizeId") || undefined;
+    const colors = searchParams.getAll("colors") || undefined;
+    const sizes = searchParams.getAll("sizes") || undefined;
+    const minPrice = parseInt(searchParams.get("min") || "0");
+    const maxPrice = parseInt(searchParams.get("max") || "100000000");
     const isFeatured = searchParams.get("isFeatured");
 
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
 
-    const products = await prismadb.product.findMany({
-      where: {
-        storeId: params.storeId,
-        categoryId,
+    // Construct the filter object conditionally
+    const filter: any = {
+      storeId: params.storeId,
+      categoryId,
+      price: {
+        gte: minPrice,
+        lte: maxPrice,
+      },
+      isFeatured: isFeatured ? true : undefined,
+      isArchived: false,
+    };
 
-        productColors: {
-          some: {
-            colorId: colorId,
-            sizes: {
-              some: {
-                id: sizeId,
-              },
+    // Add color-related filter only if colors are provided
+    if (colors && colors.length > 0) {
+      filter.productColors = {
+        some: {
+          color: {
+            name: { in: colors },
+          },
+          sizes: {
+            some: {
+              value: { in: sizes },
             },
           },
         },
+      };
+    }
 
-        isFeatured: isFeatured ? true : undefined,
-        isArchived: false,
-      },
+    const products = await prismadb.product.findMany({
+      where: filter,
       include: {
         productColors: {
           select: {
