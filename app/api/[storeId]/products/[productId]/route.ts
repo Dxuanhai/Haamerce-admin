@@ -116,9 +116,6 @@ export async function PATCH(
     if (!price) {
       return new NextResponse("Price is required", { status: 400 });
     }
-    if (!discount) {
-      return new NextResponse("Discount is required", { status: 400 });
-    }
 
     if (!categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
