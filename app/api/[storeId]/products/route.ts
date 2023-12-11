@@ -112,10 +112,10 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;
     const colors = searchParams.getAll("colors") || undefined;
-    const sizes = searchParams.getAll("sizes") || undefined;
+
     const minPrice = parseInt(searchParams.get("min") || "0");
     const maxPrice = parseInt(searchParams.get("max") || "100000000");
-    const isFeatured = searchParams.get("isFeatured");
+    const isFeatured = searchParams.get("isFeatured") || undefined;
 
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -139,11 +139,6 @@ export async function GET(
         some: {
           color: {
             name: { in: colors },
-          },
-          sizes: {
-            some: {
-              value: { in: sizes },
-            },
           },
         },
       };
