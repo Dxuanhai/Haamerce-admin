@@ -115,6 +115,9 @@ export async function GET(
 
     const minPrice = parseInt(searchParams.get("min") || "0");
     const maxPrice = parseInt(searchParams.get("max") || "100000000");
+    const take = searchParams.get("take") || undefined;
+    const skip = searchParams.get("skip") || undefined;
+
     const isFeatured = searchParams.get("isFeatured") || undefined;
 
     if (!params.storeId) {
@@ -146,6 +149,8 @@ export async function GET(
 
     const products = await prismadb.product.findMany({
       where: filter,
+      skip: skip ? parseInt(skip, 10) : undefined,
+      take: take ? parseInt(take, 10) : undefined,
       include: {
         productColors: {
           select: {
