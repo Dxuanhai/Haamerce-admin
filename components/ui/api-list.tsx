@@ -49,16 +49,16 @@ export const ApiList: React.FC<ApiListProps> = ({
       <ApiAlert
         title="PATCH"
         variant="admin"
-        description={`${baseUrl}/${entityName}/{${entityIdName}}/{${
-          entityParamsName && entityParamsName
-        }}`}
+        description={`${baseUrl}/${entityName}/{${entityIdName}}${
+          entityParamsName ? `/{${entityParamsName}} ` : ""
+        }`}
       />
       <ApiAlert
         title="DELETE"
         variant="admin"
-        description={`${baseUrl}/${entityName}/{${entityIdName}}/{${
-          entityParamsName && entityParamsName
-        }}`}
+        description={`${baseUrl}/${entityName}/{${entityIdName}}${
+          entityParamsName ? `/{${entityParamsName}} ` : ""
+        }`}
       />
     </>
   );
