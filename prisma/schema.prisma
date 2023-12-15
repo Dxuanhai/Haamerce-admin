@@ -28,6 +28,7 @@ model Voucher {
   store       Store    @relation("StoreToVoucher", fields: [storeId], references: [id])
   code        String   @unique
   discount    Int
+
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -90,13 +91,14 @@ model Order {
   phone     String    @default("")
   address   String    @default("")
   email     String @default("")
-
+  voucher Int @default(0)
   
   bills Bill[]   @relation("OrderToBill")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([storeId])
+
 }
 model Bill { 
   id   String    @id @default(uuid())
