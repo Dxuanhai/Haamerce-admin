@@ -8,13 +8,23 @@ export async function GET(
   { params }: { params: { voucherId: string } }
 ) {
   try {
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get("code") || undefined;
+
     if (!params.voucherId) {
       return new NextResponse("voucher id is required", { status: 400 });
     }
 
-    const voucher = await prismadb.voucher.findUnique({
+    const voucher = await prismadb.voucher.findFirst({
       where: {
-        id: params.voucherId,
+        OR: [
+          {
+            id: params.voucherId,
+          },
+          {
+            code: code,
+          },
+        ],
       },
     });
 

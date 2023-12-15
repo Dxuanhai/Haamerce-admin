@@ -17,14 +17,19 @@ export async function POST(
       district,
       ward,
       products,
+      voucher,
+      idGiftCode,
     } = body;
+    console.log("🚀  / idGiftCode:", idGiftCode);
 
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
+
     if (!fullName) {
       return new NextResponse("fullName  is required", { status: 400 });
     }
+
     if (!phoneNumber) {
       return new NextResponse("phoneNumber  is required", { status: 400 });
     }
@@ -63,6 +68,7 @@ export async function POST(
         email,
         address: `${province} /${district} /${ward} /${address}`,
         phone: phoneNumber,
+        voucher: voucher ? voucher : 0,
         storeId: params.storeId,
         bills: {
           createMany: {
@@ -71,6 +77,17 @@ export async function POST(
         },
       },
     });
+
+    if (idGiftCode) {
+      await prismadb.voucher.update({
+        where: {
+          id: idGiftCode,
+        },
+        data: {
+          isActive: false,
+        },
+      });
+    }
 
     return NextResponse.json(newOrder);
   } catch (error) {
