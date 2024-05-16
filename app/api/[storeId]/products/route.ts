@@ -79,6 +79,7 @@ export async function POST(
         categoryId,
         discount,
         storeId: params.storeId,
+
         productColors: {
           create: {
             color: { connect: { id: colorId } },
