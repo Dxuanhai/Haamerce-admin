@@ -8,6 +8,9 @@ datasource db {
   relationMode = "prisma"
 }
 
+
+
+
 model Store {
   id              String    @id @default(uuid())
   name            String
@@ -18,10 +21,24 @@ model Store {
 
   colors          Color[]     @relation("StoreToColor")
   orders          Order[]     @relation("StoreToOrder")
+  profiles          Profile[]     @relation("StoreToProfile")
   vouchers    Voucher[] @relation("StoreToVoucher")
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 }
+model Profile {
+  id String @id @default(uuid())
+  userId String @unique
+  name String
+  imageUrl String @db.Text
+  storeId     String
+  store       Store @relation("StoreToProfile", fields: [storeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+    @@index([storeId])
+}
+
 model Voucher {
   id          String   @id @default(uuid())
   storeId     String   // Foreign Key to Store
