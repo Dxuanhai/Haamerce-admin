@@ -73,7 +73,7 @@ export const VouchersForm: React.FC<VouchersFormProps> = ({ initialData }) => {
       router.push(`/${params.storeId}/vouchers`);
       toast.success(toastMessage);
     } catch (error: any) {
-      toast.error("Something went wrong.");
+      toast.error("Đã xảy ra lỗi.");
     } finally {
       setLoading(false);
     }
