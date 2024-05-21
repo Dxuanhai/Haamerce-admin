@@ -38,7 +38,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       toast.success("Order deleted.");
       router.refresh();
     } catch (error) {
-      toast.error("Something went wrong");
+      toast.error("Đã xảy ra lỗi");
     } finally {
       setOpen(false);
       setLoading(false);
@@ -51,7 +51,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     try {
     } catch (error) {
       console.log("🚀  / handleConfirmOrder  / error:", error);
-      toast.error("Something went wrong");
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
