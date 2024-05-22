@@ -27,14 +27,14 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     phone: item.phone,
     address: item.address,
     email: item.email,
-    voucher: formatterVND.format(item.voucher),
+    paymentMethod: item.paymentMethod,
     totalPrice: formatterVND.format(
       item.bills.reduce(
         (accumulator, currentValue) => accumulator + currentValue.price,
         0
-      ) -
-        item.voucher +
-        35000 // Subtract item.voucher here
+      ) +
+        35000 -
+        (item.voucher || 0)
     ),
     isPaid: item.isPaid,
     products: item.bills.map((item) => {

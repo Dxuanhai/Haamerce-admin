@@ -10,7 +10,8 @@ export type OrderColumn = {
   email: string;
   address: string;
   isPaid: boolean;
-  voucher: string;
+  voucher?: string;
+  paymentMethod: string;
   totalPrice: string;
   products: {
     id: string;

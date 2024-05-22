@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
+import prismadb from "@/lib/prismadb";
+export async function GET(req: Request) {
+  try {
+    const profiles = await prismadb.profile.findMany({});
 
-export async function GET(request: Request) {
-  return NextResponse.json("Hello world!");
+    return NextResponse.json(profiles);
+  } catch (error) {
+    //@ts-ignore
+    console.log("[COLORS_GET]", error?.message);
+    return new NextResponse("Internal error", { status: 500 });
+  }
 }
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
     console.log("🚀  / POST  / body:", body);
     return NextResponse.json(body);
   } catch (error) {
