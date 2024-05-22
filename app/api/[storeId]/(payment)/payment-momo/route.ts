@@ -1,29 +1,34 @@
 // app/api/momo-payment/route.js
-
+import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
 import axios from "axios";
 import crypto from "crypto";
-export async function GET(request: Request) {
-  return NextResponse.json("Hello world!");
+export async function GET(req: Request) {
+  try {
+    const profiles = await prismadb.profile.findMany({});
+
+    return NextResponse.json(profiles);
+  } catch (error) {
+    //@ts-ignore
+    console.log("[COLORS_GET]", error?.message);
+    return new NextResponse("Internal error", { status: 500 });
+  }
 }
+
 export async function POST(req: Request) {
   const body = await req.json();
-  console.log("🚀  / POST  / body:", body);
+
+  const url = process.env.URL_CALLBACK;
+  const urlClient = process.env.URL_CLIENT;
 
   const partnerCode = "MOMO";
   const accessKey = "F8BBA842ECF85";
   const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
   const requestId = partnerCode + new Date().getTime();
   const orderId = requestId;
-  const userInfo = {
-    name: "Nguyen Van A",
-    phoneNumber: "0999888999",
-    email: "email_add@domain.com",
-  };
   const orderInfo = "pay with MoMo";
-  const redirectUrl = "https://haamerce-gray.vercel.app/";
-  const ipnUrl =
-    "https://3f16-14-160-231-198.ngrok-free.app/api/payment-callback";
+  const redirectUrl = `${urlClient}/checkout/method/complete`;
+  const ipnUrl = `${url}/payment-callback`;
   const amount = body.amount;
 
   const requestType = "captureWallet";
@@ -54,15 +59,11 @@ export async function POST(req: Request) {
     orderInfo: orderInfo,
     redirectUrl: redirectUrl,
     ipnUrl: ipnUrl,
-    userInfo,
     extraData: extraData,
     requestType: requestType,
     signature: signature,
-    lang: "en",
+    lang: "vi",
   };
-
-  console.log("Request Body:");
-  console.log(requestBody);
 
   try {
     // Send the request to MoMo API

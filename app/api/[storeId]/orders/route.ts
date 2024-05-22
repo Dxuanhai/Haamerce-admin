@@ -16,11 +16,11 @@ export async function POST(
       province,
       district,
       ward,
+      paymentMethod,
       products,
       voucher,
       idGiftCode,
     } = body;
-    console.log("🚀  / idGiftCode:", idGiftCode);
 
     if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
@@ -28,6 +28,9 @@ export async function POST(
 
     if (!fullName) {
       return new NextResponse("fullName  is required", { status: 400 });
+    }
+    if (!paymentMethod) {
+      return new NextResponse("paymentMethod  is required", { status: 400 });
     }
 
     if (!phoneNumber) {
@@ -69,6 +72,7 @@ export async function POST(
         address: `${province} /${district} /${ward} /${address}`,
         phone: phoneNumber,
         voucher: voucher ? voucher : 0,
+        paymentMethod,
         storeId: params.storeId,
         bills: {
           createMany: {

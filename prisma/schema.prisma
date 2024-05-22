@@ -88,7 +88,7 @@ model Product {
   price       Int
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
-  discount    Int
+  discount     Int 
   productColors ProductColor[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -108,7 +108,9 @@ model Order {
   phone     String    @default("")
   address   String    @default("")
   email     String @default("")
-  voucher Int @default(0)
+  paymentMethod String @default("")
+
+  voucher   Int? 
   
   bills Bill[]   @relation("OrderToBill")
   createdAt DateTime  @default(now())
@@ -123,6 +125,7 @@ model Bill {
   price Int
   color String
   size String
+  image String
   quantity Int
   orderId String
   order Order @relation("OrderToBill",fields: [orderId],references: [id], onDelete: Cascade)
