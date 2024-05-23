@@ -10,7 +10,7 @@ export type OrderColumn = {
   email: string;
   address: string;
   isPaid: boolean;
-  voucher?: string;
+
   paymentMethod: string;
   totalPrice: string;
   products: {
@@ -41,9 +41,10 @@ export const columns: ColumnDef<OrderColumn>[] = [
     accessorKey: "address",
     header: "Address",
   },
+
   {
-    accessorKey: "voucher",
-    header: "Voucher",
+    accessorKey: "paymentMethod",
+    header: "PaymentMethod",
   },
   {
     accessorKey: "totalPrice",

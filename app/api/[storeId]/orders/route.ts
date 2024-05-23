@@ -7,6 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
+    console.log("🚀  / body:", body);
 
     const {
       fullName,
@@ -64,7 +65,6 @@ export async function POST(
     if (!storeId) {
       return new NextResponse("Unauthorized", { status: 405 });
     }
-
     const newOrder = await prismadb.order.create({
       data: {
         fullName,
@@ -76,7 +76,15 @@ export async function POST(
         storeId: params.storeId,
         bills: {
           createMany: {
-            data: products,
+            //@ts-ignore
+            data: products.map((product) => ({
+              color: product.color,
+              image: product.image,
+              price: product.price,
+              name: product.name, // Include the name from the products array
+              size: product.size,
+              quantity: product.quantity,
+            })),
           },
         },
       },
@@ -85,7 +93,7 @@ export async function POST(
     if (idGiftCode) {
       await prismadb.voucher.update({
         where: {
-          id: idGiftCode,
+          code: idGiftCode,
         },
         data: {
           isActive: false,
