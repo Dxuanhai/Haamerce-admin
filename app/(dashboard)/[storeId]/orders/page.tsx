@@ -30,7 +30,8 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     paymentMethod: item.paymentMethod,
     totalPrice: formatterVND.format(
       item.bills.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.price,
+        (accumulator, currentValue) =>
+          accumulator + currentValue.price * currentValue.quantity,
         0
       ) +
         35000 -
