@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { content, userId, parentId, productId, rating } = body;
+    const { content, userId, productId, rating } = body;
 
     if (!content) {
       return new NextResponse("Content is required", { status: 400 });
@@ -28,7 +28,6 @@ export async function POST(req: Request) {
         productId: productId,
         userId: userId,
         rating,
-        parentId: parentId || null,
       },
     });
 
@@ -54,7 +53,6 @@ export async function GET(req: Request) {
       },
       include: {
         user: true,
-        replies: true, // Include replies to the REVIEWS
       },
       orderBy: {
         createdAt: "desc",

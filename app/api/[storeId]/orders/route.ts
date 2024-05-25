@@ -29,35 +29,34 @@ export async function POST(
     }
 
     if (!fullName) {
-      return new NextResponse("fullName  is required", { status: 400 });
+      return new NextResponse("fullName is required", { status: 400 });
     }
     if (!userId) {
-      return new NextResponse("userId  is required", { status: 400 });
+      return new NextResponse("userId is required", { status: 400 });
     }
     if (!paymentMethod) {
-      return new NextResponse("paymentMethod  is required", { status: 400 });
+      return new NextResponse("paymentMethod is required", { status: 400 });
     }
-
     if (!phoneNumber) {
-      return new NextResponse("phoneNumber  is required", { status: 400 });
+      return new NextResponse("phoneNumber is required", { status: 400 });
     }
     if (!email) {
-      return new NextResponse("email  is required", { status: 400 });
+      return new NextResponse("email is required", { status: 400 });
     }
     if (!address) {
-      return new NextResponse("address  is required", { status: 400 });
+      return new NextResponse("address is required", { status: 400 });
     }
     if (!province) {
-      return new NextResponse(" province  is required", { status: 400 });
+      return new NextResponse("province is required", { status: 400 });
     }
     if (!district) {
       return new NextResponse("district is required", { status: 400 });
     }
     if (!ward) {
-      return new NextResponse("district is required", { status: 400 });
+      return new NextResponse("ward is required", { status: 400 });
     }
     if (!products) {
-      return new NextResponse("district is required", { status: 400 });
+      return new NextResponse("products are required", { status: 400 });
     }
 
     const storeId = await prismadb.store.findFirst({
@@ -69,6 +68,7 @@ export async function POST(
     if (!storeId) {
       return new NextResponse("Unauthorized", { status: 405 });
     }
+
     const newOrder = await prismadb.order.create({
       data: {
         fullName,
@@ -85,7 +85,7 @@ export async function POST(
               color: product.color,
               image: product.image,
               price: product.price,
-              name: product.name, // Include the name from the products array
+              name: product.name,
               size: product.size,
               quantity: product.quantity,
             })),
@@ -93,19 +93,22 @@ export async function POST(
         },
       },
     });
+    //@ts-ignore
+    const purchasedData = products.map((product) => ({
+      userId: userId,
+      color: product.color,
+      image: product.image,
+      price: product.price,
+      name: product.name,
+      size: product.size,
+      quantity: product.quantity,
+      productId: product.id,
+    }));
 
-    prismadb.purchased.create({
-      data: {
-        userId,
-        color: products.color,
-        image: products.image,
-        price: products.price,
-        name: products.name, // Include the name from the products array
-        size: products.size,
-        quantity: products.quantity,
-        productId: products.id,
-      },
+    const purchased = await prismadb.purchased.createMany({
+      data: purchasedData,
     });
+
     if (idGiftCode) {
       await prismadb.voucher.update({
         where: {
