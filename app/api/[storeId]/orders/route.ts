@@ -21,6 +21,7 @@ export async function POST(
       products,
       voucher,
       idGiftCode,
+      userId,
     } = body;
 
     if (!params.storeId) {
@@ -29,6 +30,9 @@ export async function POST(
 
     if (!fullName) {
       return new NextResponse("fullName  is required", { status: 400 });
+    }
+    if (!userId) {
+      return new NextResponse("userId  is required", { status: 400 });
     }
     if (!paymentMethod) {
       return new NextResponse("paymentMethod  is required", { status: 400 });
@@ -90,6 +94,18 @@ export async function POST(
       },
     });
 
+    prismadb.purchased.create({
+      data: {
+        userId,
+        color: products.color,
+        image: products.image,
+        price: products.price,
+        name: products.name, // Include the name from the products array
+        size: products.size,
+        quantity: products.quantity,
+        productId: products.id,
+      },
+    });
     if (idGiftCode) {
       await prismadb.voucher.update({
         where: {
