@@ -45,53 +45,36 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { colorId: string; storeId: string } }
+  { params }: { params: { profileId: string } }
 ) {
   try {
-    const { userId } = auth();
-
     const body = await req.json();
 
-    const { name, value } = body;
-
-    if (!userId) {
-      return new NextResponse("Unauthenticated", { status: 403 });
-    }
+    const { name, imageUrl } = body;
 
     if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+      return new NextResponse("name is required", { status: 400 });
     }
 
-    if (!value) {
-      return new NextResponse("Value is required", { status: 400 });
+    if (!params.profileId) {
+      return new NextResponse("userId is required", { status: 400 });
     }
 
-    if (!params.colorId) {
-      return new NextResponse("Color id is required", { status: 400 });
+    if (!imageUrl) {
+      return new NextResponse("imageUrl is required", { status: 400 });
     }
 
-    const storeByUserId = await prismadb.store.findFirst({
+    const newProfile = await prismadb.profile.update({
       where: {
-        id: params.storeId,
-        userId,
-      },
-    });
-
-    if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 405 });
-    }
-
-    const color = await prismadb.color.update({
-      where: {
-        id: params.colorId,
+        userId: params.profileId,
       },
       data: {
+        imageUrl,
         name,
-        value,
       },
     });
 
-    return NextResponse.json(color);
+    return NextResponse.json(newProfile);
   } catch (error) {
     console.log("[COLOR_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
