@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs";
-
 import prismadb from "@/lib/prismadb";
 
 export async function GET(
@@ -8,15 +6,40 @@ export async function GET(
   { params }: { params: { profileId: string } }
 ) {
   try {
+    const { searchParams } = new URL(req.url);
+    const skip = parseInt(searchParams.get("skip") || "0");
+    const take = parseInt(searchParams.get("take") || "5");
+
     if (!params.profileId) {
-      return new NextResponse("profile id is required", { status: 400 });
+      return new NextResponse("Profile id is required", { status: 400 });
     }
 
     const profile = await prismadb.profile.findUnique({
       where: {
         userId: params.profileId,
       },
+      include: {
+        purchased: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          skip: skip,
+          take: take,
+        },
+        reviews: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          skip: skip,
+          take: take,
+        },
+        _count: true,
+      },
     });
+
+    if (!profile) {
+      return new NextResponse("Profile not found", { status: 404 });
+    }
 
     return NextResponse.json(profile);
   } catch (error) {
