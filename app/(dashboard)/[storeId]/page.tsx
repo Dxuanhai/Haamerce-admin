@@ -9,7 +9,9 @@ import { getSalesCount } from "@/actions/get-sales-count";
 import { getGraphRevenue } from "@/actions/get-graph-revenue";
 import { getStockCount } from "@/actions/get-stock-count";
 import { formatterVND } from "@/lib/utils";
-
+import { getYearlyGraphRevenue } from "@/actions/get-yearly-graph-revenue";
+import { getWeeklyGraphRevenue } from "@/actions/get-weekly-graph-revenue";
+import { getDailyGraphRevenue } from "@/actions/get-daily-graph-revenue";
 interface DashboardPageProps {
   params: {
     storeId: string;
@@ -20,7 +22,11 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({ params }) => {
   const totalRevenue = await getTotalRevenue(params.storeId);
   const graphRevenue = await getGraphRevenue(params.storeId);
   const salesCount = await getSalesCount(params.storeId);
+  const weeklyGraphRevenue = await getWeeklyGraphRevenue(params.storeId);
+  const dailyGraphRevenue = await getDailyGraphRevenue(params.storeId);
+  const yearlyGraphRevenue = await getYearlyGraphRevenue(params.storeId);
   const stockCount = await getStockCount(params.storeId);
+  console.log("graphRevenue: ",graphRevenue)
 
   return (
     <div className="flex-col">
@@ -64,12 +70,36 @@ const DashboardPage: React.FC<DashboardPageProps> = async ({ params }) => {
         </div>
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+            <CardTitle>Daily</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <Overview data={dailyGraphRevenue} />
+          </CardContent>
+        </Card>
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Weekly</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <Overview data={weeklyGraphRevenue} />
+          </CardContent>
+        </Card>
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Monthly</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <Overview data={graphRevenue} />
           </CardContent>
         </Card>
+        <Card className="col-span-4">
+    <CardHeader>
+      <CardTitle>Yearly</CardTitle>
+    </CardHeader>
+    <CardContent className="pl-2">
+      <Overview data={yearlyGraphRevenue} />
+    </CardContent>
+  </Card>
       </div>
     </div>
   );
